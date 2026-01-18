@@ -40,6 +40,12 @@ function setup(){
 		return false
 	}
 
+	document
+		.getElementsByTagName("canvas")[0]
+		.addEventListener("contextmenu", e => {
+			e.preventDefault()
+		})
+
 	updateTotal()
 	pat.resize(pat.width * scale, pat.height * scale)
 	mar.resize(mar.width * scale, mar.height * scale)
@@ -86,7 +92,7 @@ function updateTotal(){
 }
 
 // line(30, 30, 400, 300);
-function mouseClicked(){
+function mouseClicked(event){
 	hexes.forEach(h => {
 		if(h.within(mouseX-upperLeftX-offsetX, mouseY-upperLeftY-offsetY)){
 			h.toggle();
@@ -97,12 +103,17 @@ function mouseClicked(){
 			}
 		}
 	});
-	updateTotal()
+	updateTotal();
+	if(mouseButton != LEFT){
+		event.stopPropagation()
+		return false
+	}
 }
 
-function mousePressed() {
+function mousePressed(event) {
   if (isMouseWithinCanvas() && mouseButton != LEFT) {
     dragging = true;
+    event.stopPropagation()
     return false;
   }
 }
