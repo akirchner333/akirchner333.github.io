@@ -110,12 +110,21 @@ function mouseClicked(event){
 	}
 }
 
+function windowResized(){
+	resizeCanvas(windowWidth, windowHeight-30)
+}
+
+let dragging = false;
 function mousePressed(event) {
   if (isMouseWithinCanvas() && mouseButton != LEFT) {
     dragging = true;
-    event.stopPropagation()
-    return false;
   }
+}
+
+function touchStarted(){
+	if(isMouseWithinCanvas()){
+		dragging = true;
+	}
 }
 
 function mouseReleased() {
@@ -123,12 +132,19 @@ function mouseReleased() {
 }
 
 function mouseDragged() {
-  if (dragging) {
-    // Update the canvas position, but keep within bounds 
-    // total canvas area is 2000 x 1400
+  if (dragging && mouseButton != LEFT) {
+    // Update the canvas position, but keep within bounds
     offsetX = constrain(offsetX - (pmouseX - mouseX), -pat.width + width, 0);
     offsetY = constrain(offsetY - (pmouseY - mouseY), -pat.height + height, 0);
 
+  }
+}
+
+function touchMoved(){
+	if (dragging) {
+    // Update the canvas position, but keep within bounds
+    offsetX = constrain(offsetX - (pmouseX - mouseX), -pat.width + width, 0);
+    offsetY = constrain(offsetY - (pmouseY - mouseY), -pat.height + height, 0);
   }
 }
 
