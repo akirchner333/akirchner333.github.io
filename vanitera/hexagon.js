@@ -38,10 +38,6 @@ class Hexagon{
 	}
 
 	within(x, y){
-		// if(x < min(this.vertices.map(v => v.x))) return false;
-		// if(x > max(this.vertices.map(v => v.x))) return false;
-		// if(y < min(this.vertices.map(v => v.y))) return false;
-		// if(y > max(this.vertices.map(v => v.y))) return false;
 		var toPoint = createVector(x - this.x, y - this.y)
 		// Check is it inside the outer circle
 		if(toPoint.mag() > this.radius) return false

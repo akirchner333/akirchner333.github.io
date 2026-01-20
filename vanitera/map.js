@@ -1,23 +1,32 @@
-let pat, mar;
-let offsetX = 0;
-let offsetY = 0;
+// How big the image is displayed. Smaller the scale, smaller the image
+const scale = 0.8
+// Shifts the whole hex grid. Adjust this to make the hexes line up with the map
+const upperLeftX = 10 * scale;
+const upperLeftY = 0 * scale;
+// How big the hexes are
+const radius = 46 * scale;
+// The hexes are slightly wider than they're tall
+// This number makes sure they properly tile over the map
+const xWider = 0.0215;
+// How many hexes you want in each row and how many columns of hexes you want
+const hexesVertical = 40;
+const hexesHorizontal = 60;
 
+let pat, mar;
 function preload(){
 	pat = loadImage("Patlania.png")
 	mar = loadImage("Maraga.png")
 }
 
-const scale = 0.8
+let offsetX = 0;
+let offsetY = 0;
 const hexes = []
-const upperLeftX = 10 * scale;
-const upperLeftY = 0;
-const radius = 46 * scale;
 let total = 0
 let whichMap = true
 function setup(){
 	createCanvas(windowWidth, windowHeight-30);
-	for(let y = 0; y < 40; y++){
-		for(let x = 0; x < 60; x++){
+	for(let y = 0; y < hexesVertical; y++){
+		for(let x = 0; x < hexesHorizontal; x++){
 			hexes.push(new Hexagon(
 				...hexCenter(x, y),
 				radius,
@@ -52,7 +61,7 @@ function setup(){
 }
 
 function hexCenter(x, y){
-	const xOffset = radius * (1.5 + 0.0215)
+	const xOffset = radius * (1.5 + xWider)
 	const yOffset = radius/0.575
 	if(x % 2 == 0){
 		return [x * xOffset, y * yOffset];
@@ -61,8 +70,6 @@ function hexCenter(x, y){
 }
 
 function draw(){
-	background("blue")
-
 	translate(offsetX, offsetY)
 	image(whichMap ? pat : mar, 0, 0, image.width/10, image.height/10)
 	translate(upperLeftX, upperLeftY)
@@ -91,7 +98,6 @@ function updateTotal(){
 	document.getElementById("total").innerText = total;
 }
 
-// line(30, 30, 400, 300);
 function mouseClicked(event){
 	hexes.forEach(h => {
 		if(h.within(mouseX-upperLeftX-offsetX, mouseY-upperLeftY-offsetY)){
