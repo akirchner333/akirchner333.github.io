@@ -1,16 +1,11 @@
-// How big the image is displayed. Smaller the scale, smaller the image
-const scale = 0.8
-// Shifts the whole hex grid. Adjust this to make the hexes line up with the map
-const upperLeftX = 10 * scale;
-const upperLeftY = 0 * scale;
-// How big the hexes are
-const radius = 46 * scale;
-// The hexes are slightly wider than they're tall
-// This number makes sure they properly tile over the map
+const upperLeftY = 1;
+const upperLeftX = 10;
+const radius = 46;
 const xWider = 0.0215;
-// How many hexes you want in each row and how many columns of hexes you want
+const yWider = 0.0065;
 const hexesVertical = 40;
 const hexesHorizontal = 60;
+let zeroX, zeroY;
 
 let pat, mar;
 function preload(){
@@ -18,22 +13,31 @@ function preload(){
 	mar = loadImage("Maraga.png")
 }
 
-let offsetX = 0;
-let offsetY = 0;
-const hexes = []
+
+let panZoom;
+const hexes = [];
 let total = 0
-let whichMap = true
+let whichMap = true;
 function setup(){
-	createCanvas(windowWidth, windowHeight-30);
+	const c = createCanvas(windowWidth, windowHeight-30);
+	c.parent("#canvas")
+	panZoom = new Zoom(pat.width, pat.height)
+
+	zeroX = upperLeftX - pat.width/2
+	zeroY = upperLeftY - pat.height/2;
+
 	for(let y = 0; y < hexesVertical; y++){
 		for(let x = 0; x < hexesHorizontal; x++){
-			hexes.push(new Hexagon(
+			const hex = new Hexagon(
 				...hexCenter(x, y),
 				radius,
 				(y+1) + x * 100
-			))
+			)
+			hexes.push(hex)
 		}
 	}
+
+	updateTotal()
 
 	document.getElementById("reset").onclick = (event) => {
 		hexes.forEach(h => h.reset());
@@ -54,44 +58,38 @@ function setup(){
 		.addEventListener("contextmenu", e => {
 			e.preventDefault()
 		})
-
-	updateTotal()
-	pat.resize(pat.width * scale, pat.height * scale)
-	mar.resize(mar.width * scale, mar.height * scale)
-}
-
-function hexCenter(x, y){
-	const xOffset = radius * (1.5 + xWider)
-	const yOffset = radius/0.575
-	if(x % 2 == 0){
-		return [x * xOffset, y * yOffset];
-	}
-	return [x * xOffset, y * yOffset + yOffset/2];
 }
 
 function draw(){
-	translate(offsetX, offsetY)
-	image(whichMap ? pat : mar, 0, 0, image.width/10, image.height/10)
-	translate(upperLeftX, upperLeftY)
+	background("white")
+	scale(panZoom.zoom)
+	translate(panZoom.xPan, panZoom.yPan)
+
+	imageMode(CENTER)
+	image(
+		whichMap ? pat : mar, 0, 0, 
+		pat.width, 
+		pat.height
+	)
 	strokeWeight(1)
+	stroke("white")
 	hexes.forEach(h => {
 		h.draw()
 	});
+}
 
-	// if(keyIsPressed){
-	// 	if(key == "d"){
-	// 		offsetX = constrain(offsetX - 1, -pat.width + width, 0);
-	// 	}
-	// 	if(key == "a"){
-	// 		offsetX = constrain(offsetX + 1, -pat.width + width, 0);
-	// 	}
-	// 	if(key == "w"){
-	// 		offsetY = constrain(offsetY + 1, -pat.height + height, 0);
-	// 	}
-	// 	if(key == "s"){
-	// 		offsetY = constrain(offsetY - 1, -pat.height + height, 0);
-	// 	}
-	// }
+function hexCenter(x, y){
+	const xOffset = radius * (1.5 + xWider);
+	const yOffset = radius * (sqrt(3) + yWider);
+	if(x % 2 == 0){
+		return [
+			x * xOffset + zeroX,
+			y * yOffset + zeroY];
+	}
+	return [
+		x * xOffset + zeroX, 
+		y * yOffset + yOffset/2 + zeroY
+	];
 }
 
 function updateTotal(){
@@ -99,20 +97,23 @@ function updateTotal(){
 }
 
 function mouseClicked(event){
-	hexes.forEach(h => {
-		if(h.within(mouseX-upperLeftX-offsetX, mouseY-upperLeftY-offsetY)){
-			h.toggle();
-			if(h.currentColor == 0){
-				total--;
-			}else if(h.currentColor == 1){
-				total++;
+	if(isMouseWithinCanvas()){
+		hexes.forEach(h => {
+			if(h.within(...panZoom.screenToMap(mouseX, mouseY))){
+				h.toggle();
+				if(h.currentColor == 0){
+					total--;
+				}else if(h.currentColor == 1){
+					total++;
+				}
 			}
+		});
+		updateTotal();
+
+		if(mouseButton != LEFT){
+			event.stopPropagation()
+			return false
 		}
-	});
-	updateTotal();
-	if(mouseButton != LEFT){
-		event.stopPropagation()
-		return false
 	}
 }
 
@@ -139,21 +140,20 @@ function mouseReleased() {
 
 function mouseDragged() {
   if (dragging && mouseButton != LEFT) {
-    // Update the canvas position, but keep within bounds
-    offsetX = constrain(offsetX - (pmouseX - mouseX), -pat.width + width, 0);
-    offsetY = constrain(offsetY - (pmouseY - mouseY), -pat.height + height, 0);
-
+    panZoom.updateOffset(pmouseX - mouseX, pmouseY - mouseY);
   }
 }
 
 function touchMoved(){
 	if (dragging) {
-    // Update the canvas position, but keep within bounds
-    offsetX = constrain(offsetX - (pmouseX - mouseX), -pat.width + width, 0);
-    offsetY = constrain(offsetY - (pmouseY - mouseY), -pat.height + height, 0);
+    panZoom.updateOffset(pmouseX - mouseX, pmouseY - mouseY);
   }
 }
 
 function isMouseWithinCanvas() {
   return mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height;
+}
+
+function mouseWheel(event){
+	panZoom.changeZoom(-event.delta/500)
 }

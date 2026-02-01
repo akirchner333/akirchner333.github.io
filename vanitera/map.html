@@ -5,6 +5,7 @@
     <script language="javascript" type="text/javascript" src="p5.min.js"></script>
     <script language="javascript" src="map.js"></script>
     <script language="javascript" src="hexagon.js"></script>
+    <script language="javascript" src="zoom.js"></script>
     <title>Vanitera Selectable Map</title>
     <style>
       body {
@@ -14,18 +15,27 @@
       }
 
       #toolbar{
-        position: fixed;
-        top: 0;
-        left: 0;
         background: white;
         width: 100%;
+
         display: flex;
         justify-content: space-around;
         padding: 5px;
+        height: 25px;
       }
 
-      canvas{
-        margin-top: 25px;
+      #zoom-buttons{
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: white;
+        padding: 10px;
+        border: 1px solid black;
+      }
+
+      #zoom-in, #zoom-out{
+        font-size: 40px;
+        width: 50px;
       }
     </style>
   </head>
@@ -34,6 +44,11 @@
       <div>Hexes Selected: <span id="total">0</span></div>
       <div><button id="switch">Switch Maps</button></div>
       <div><button id="reset">Reset</button></div>
+    </div>
+    <div id="canvas"></div>
+    <div id="zoom-buttons">
+      <button id="zoom-in">+</button><br><br>
+      <button id="zoom-out">-</button>
     </div>
   </body>
 </html>
