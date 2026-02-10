@@ -28,10 +28,7 @@ class HexSelect extends Tool{
 		}
 
 		this.totalDisplay = document.getElementById("total")
-		this.updateTotal()
-
-		zeroX = upperLeftX - pat.width/2
-		zeroY = upperLeftY - pat.height/2;
+		this.updateTotal();
 
 		document.getElementById("reset").onclick = (event) => {
 			this.reset()
