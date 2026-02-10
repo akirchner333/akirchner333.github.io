@@ -6,6 +6,9 @@
     <script language="javascript" src="map.js"></script>
     <script language="javascript" src="hexagon.js"></script>
     <script language="javascript" src="zoom.js"></script>
+    <script language="javascript" src="tools/tool.js"></script>
+    <script language="javascript" src="tools/hexSelect.js"></script>
+    <!-- <script src="https://unpkg.com/p5.js-svg@1.6.0"></script> -->
     <title>Vanitera Selectable Map</title>
     <style>
       body {
@@ -21,11 +24,12 @@
         display: flex;
         justify-content: space-around;
         padding: 5px;
-        height: 25px;
+        height: 35px;
+        box-sizing: border-box;
       }
 
       #zoom-buttons{
-        position: fixed;
+        position: absolute;
         bottom: 10px;
         right: 10px;
         background: white;
@@ -37,10 +41,37 @@
         font-size: 40px;
         width: 50px;
       }
+
+      .invisible{
+        display: none;
+      }
+
+      #instructions{
+        position: absolute;
+        left: 0;
+        top: 35px;
+        width: 100%;
+        max-width: 450px;
+        background: white;
+        border: 1px solid white;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+
+      #close-instructions{
+        position: absolute;
+        top: 0;
+        right: 0;
+        border: 1px solid black;
+        padding: 2px;
+        margin: 2px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
     <div id="toolbar">
+      <div><button id="open-instructions">Info</button></div>
       <div>Hexes Selected: <span id="total">0</span></div>
       <div><button id="switch">Switch Maps</button></div>
       <div><button id="reset">Reset</button></div>
@@ -49,6 +80,16 @@
     <div id="zoom-buttons">
       <button id="zoom-in">+</button><br><br>
       <button id="zoom-out">-</button>
+    </div>
+    <div id="instructions" class="invisible">
+      <div id="close-instructions">X</div>
+      <ul>
+        <li>Click on hexes to select them.</li>
+        <li>Click "Reset" button to unselect all hexes.</li>
+        <li>Right click and drag to move the map.</li>
+        <li>Zoom in with the scroll wheel or the buttons in the bottom left</li>
+        <li>The site may not work on iPhones, sorry about that.</li>
+        <li>I'm Renae Cinna on the discord, feel free to reach out if you have any questions</li>
     </div>
   </body>
 </html>

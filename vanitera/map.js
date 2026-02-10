@@ -1,51 +1,20 @@
-const upperLeftY = 1;
-const upperLeftX = 10;
-const radius = 46;
-const xWider = 0.0215;
-const yWider = 0.0065;
-const hexesVertical = 40;
-const hexesHorizontal = 60;
-let zeroX, zeroY;
-
 let pat, mar;
 function preload(){
 	pat = loadImage("Patlania.png")
 	mar = loadImage("Maraga.png")
 }
 
-
 let panZoom;
-const hexes = [];
-let total = 0
+let tool;
 let whichMap = true;
 function setup(){
-	const c = createCanvas(windowWidth, windowHeight-30);
+	const c = createCanvas(windowWidth, windowHeight-35);
+	// const c = createCanvas(pat.width, pat.height, SVG)
 	c.parent("#canvas")
 	panZoom = new Zoom(pat.width, pat.height)
+	panZoom.zoom = 1
 
-	zeroX = upperLeftX - pat.width/2
-	zeroY = upperLeftY - pat.height/2;
-
-	for(let y = 0; y < hexesVertical; y++){
-		for(let x = 0; x < hexesHorizontal; x++){
-			const hex = new Hexagon(
-				...hexCenter(x, y),
-				radius,
-				(y+1) + x * 100
-			)
-			hexes.push(hex)
-		}
-	}
-
-	updateTotal()
-
-	document.getElementById("reset").onclick = (event) => {
-		hexes.forEach(h => h.reset());
-		total = 0;
-		updateTotal();
-		event.stopPropagation();
-		return false
-	}
+	tool = new HexSelect()
 
 	document.getElementById("switch").onclick = (event) => {
 		whichMap = !whichMap;
@@ -58,6 +27,29 @@ function setup(){
 		.addEventListener("contextmenu", e => {
 			e.preventDefault()
 		})
+
+	document
+		.getElementById("open-instructions")
+		.onclick = (event) => {
+			const instructions = document.getElementById("instructions");
+			if(instructions.classList.contains("invisible")){
+				instructions.classList.remove("invisible")
+			}else{
+				instructions.classList.add("invisible")
+			}
+			
+			event.stopPropagation();
+			return false;
+		}
+
+	document
+		.getElementById("close-instructions")
+		.onclick = (event) => {
+			document.getElementById("instructions").classList.add("invisible")
+			
+			event.stopPropagation();
+			return false;
+		}
 }
 
 function draw(){
@@ -71,54 +63,16 @@ function draw(){
 		pat.width, 
 		pat.height
 	)
-	strokeWeight(1)
-	stroke("white")
-	hexes.forEach(h => {
-		h.draw()
-	});
-}
 
-function hexCenter(x, y){
-	const xOffset = radius * (1.5 + xWider);
-	const yOffset = radius * (sqrt(3) + yWider);
-	if(x % 2 == 0){
-		return [
-			x * xOffset + zeroX,
-			y * yOffset + zeroY];
-	}
-	return [
-		x * xOffset + zeroX, 
-		y * yOffset + yOffset/2 + zeroY
-	];
-}
-
-function updateTotal(){
-	document.getElementById("total").innerText = total;
+	tool.draw();
 }
 
 function mouseClicked(event){
-	if(isMouseWithinCanvas()){
-		hexes.forEach(h => {
-			if(h.within(...panZoom.screenToMap(mouseX, mouseY))){
-				h.toggle();
-				if(h.currentColor == 0){
-					total--;
-				}else if(h.currentColor == 1){
-					total++;
-				}
-			}
-		});
-		updateTotal();
-
-		if(mouseButton != LEFT){
-			event.stopPropagation()
-			return false
-		}
-	}
+	tool.mouseClicked(event);
 }
 
 function windowResized(){
-	resizeCanvas(windowWidth, windowHeight-30)
+	resizeCanvas(windowWidth, windowHeight-35)
 }
 
 let dragging = false;
@@ -135,12 +89,21 @@ function touchStarted(){
 }
 
 function mouseReleased() {
+	tool.mouseReleased()
   dragging = false;
+}
+
+function mouseMoved(){
+	if(tool){
+		tool.mouseMoved();	
+	}
 }
 
 function mouseDragged() {
   if (dragging && mouseButton != LEFT) {
     panZoom.updateOffset(pmouseX - mouseX, pmouseY - mouseY);
+  }else{
+  	tool.mouseMoved();
   }
 }
 
@@ -156,4 +119,8 @@ function isMouseWithinCanvas() {
 
 function mouseWheel(event){
 	panZoom.changeZoom(-event.delta/500)
+}
+
+function keyPressed(){
+	tool.keyPressed();
 }
